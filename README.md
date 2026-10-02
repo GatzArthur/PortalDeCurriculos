@@ -39,10 +39,11 @@ O script `database/01_create_schema.sql` cria o banco **PortalDeCurriculosDb** e
 
 Requer o Docker Desktop em execução (no Windows, com a virtualização habilitada).
 
-1. Crie o arquivo `.env` com a senha do usuário `sa`. Use uma senha forte (mínimo de 8 caracteres, com maiúscula, minúscula, número e símbolo):
+1. Crie um novo arquivo `.env` com a senha do usuário `sa` (System Administrator) utilizando os comandos abaixo. Use uma senha forte (mínimo de 8 caracteres, com maiúscula, minúscula, número e símbolo). ⚠️ A senha definida para o usuário administrador (SA) do SQL Server deve atender aos requisitos de complexidade de senha citados anteriormente. Caso contrário, a configuração ou inicialização do SQL Server não será inicializado corretamente:
 
    ```
    # PowerShell
+   Na raiz do projeto:
    Copy-Item .env.example .env
    # Linux/macOS
    cp .env.example .env
@@ -89,15 +90,7 @@ Ou abra o script no SSMS/Azure Data Studio e execute.
 
 ## 2. Configurar a conexão (sem credenciais no repositório)
 
-O `appsettings.json` traz apenas um valor de exemplo (`SUA_SENHA_AQUI`). Informe a conexão real por **user-secrets** (ficam fora do repositório):
-
-```
-dotnet user-secrets set "ConnectionStrings:Default" "<CONNECTION STRING>" --project backend/src/PortalDeCurriculos.Api
-```
-
-No Visual Studio, também é possível usar *botão direito no projeto > Manage User Secrets*.
-
-Connection strings para cada opção do passo 1:
+Connection strings para cada opção do passo 1 (elas também estão presentes já no arquivo `appsettings.json` , basta descomentar a que deseja usar) :
 
 | Opção | Connection string |
 |---|---|
@@ -105,27 +98,26 @@ Connection strings para cada opção do passo 1:
 | LocalDB | `Server=(localdb)\MSSQLLocalDB;Database=PortalDeCurriculosDb;Trusted_Connection=True;TrustServerCertificate=True` |
 | SQL Server existente | `Server=<servidor>;Database=PortalDeCurriculosDb;User Id=<usuario>;Password=<senha>;TrustServerCertificate=True` |
 
-Também é possível usar a variável de ambiente `ConnectionStrings__Default`.
+O `appsettings.json` do `PortalDeCurriculos.API` traz apenas um valor de exemplo (`SUA_SENHA_AQUI`). Informe a senha que foi definida no `.env` anteriormente.
 
 ## 3. Executar
 
-### Pelo Visual Studio (backend)
+### Backend Pelo Visual Studio
 
 1. *Arquivo > Abrir > Projeto/Solução* e escolha `backend/PortalDeCurriculos.sln`.
-2. Configure a connection string (passo 2) com *botão direito em `PortalDeCurriculos.Api` > Gerenciar Segredos do Usuário*.
+2. Configure a connection string (passo 2).
 3. Selecione o perfil **http** e execute (F5). Os testes ficam em *Teste > Gerenciador de Testes*.
 
 Se o Visual Studio não reconhecer a solução, gere uma nova com `dotnet new sln -n PortalDeCurriculos` dentro de `backend` e `dotnet sln add src/PortalDeCurriculos.Api tests/PortalDeCurriculos.Tests`.
 
-### Pela linha de comando
-
-Backend (http://localhost:5080):
+### Backend Pela linha de comando
 
 ```
 dotnet run --project backend/src/PortalDeCurriculos.Api
 ```
 
-Frontend (http://localhost:4200), em outro terminal:
+### Frontend Pela Linha de Comando
+Em outro terminal (CMD, pois pelo Powershell pode esbarrar no bloqueio de scripts) acesse a pasta raiz do projeto e em seguida rode os seguinte comandos:
 
 ```
 cd frontend
@@ -135,7 +127,7 @@ npm start
 
 O `ng serve` encaminha `/api` para o backend por meio do `frontend/proxy.conf.json`. Se mudar a porta do backend, ajuste esse arquivo.
 
-Para testar a importação, use `samples/curriculo-ficticio.pdf` na tela **Novo cadastro**.
+Para testar a importação, o pdf fictício está localizado em: `samples/curriculo-ficticio.pdf`, e então é só selecioná-lo na tela de **Novo Cadastro**.
 
 ## 4. Testes
 
