@@ -129,6 +129,48 @@ O `ng serve` encaminha `/api` para o backend por meio do `frontend/proxy.conf.js
 
 Para testar a importação, o pdf fictício está localizado em: `samples/curriculo-ficticio.pdf`, e então é só selecioná-lo na tela de **Novo Cadastro**.
 
+
+## Consultar os dados no banco
+
+Depois de criar o banco e cadastrar candidatos pela aplicação, é possível conferir a tabela e os registros diretamente no SQL Server.
+
+### Com o SQL Server Management Studio (Windows)
+
+No SSMS, abra *Conectar > Mecanismo de Banco de Dados* e preencha:
+
+| Campo | Docker | LocalDB |
+|---|---|---|
+| Nome do servidor | `localhost,1433` (com **vírgula**) | `(localdb)\MSSQLLocalDB` |
+| Autenticação | Autenticação do SQL Server | Autenticação do Windows |
+| Logon | `sa` | (não se aplica) |
+| Senha | a definida em `SA_PASSWORD` no `.env` | (não se aplica) |
+
+No caso do Docker, abra também a aba **Opções de Conexão** e marque **Confiar no certificado do servidor**; sem isso, o SSMS recusa a conexão por causa do certificado de desenvolvimento.
+
+Depois de conectar, execute uma consulta:
+
+```sql
+SELECT * FROM PortalDeCurriculosDb.dbo.Candidatos ORDER BY CriadoEm DESC;
+```
+
+Observação: a coluna `CriadoEm` é gravada em UTC. A aplicação converte para o horário local ao exibir, então no banco o valor aparece algumas horas à frente do relógio local.
+
+### Sem SSMS (Mac, Linux ou qualquer sistema)
+
+Use o Azure Data Studio ou a extensão SQL Server do VS Code, com os mesmos dados de conexão da coluna **Docker** acima. Também é possível consultar direto pelo container, sem nenhuma ferramenta gráfica:
+
+```
+docker exec curriculos-sql /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "SUA_SENHA" -C -d PortalDeCurriculosDb -Q "SELECT * FROM Candidatos"
+```
+
+### Se não conectar
+
+- Confira se o container está ativo com `docker ps` (o `curriculos-sql` deve aparecer como *Up*).
+- Confira se a senha digitada é a mesma do `.env`.
+- Se a porta 1433 estiver ocupada por outro SQL Server na máquina, altere o mapeamento no `docker-compose.yml` (por exemplo, `"14330:1433"`) e use `localhost,14330` na conexão.
+- Se houver mais de um SQL Server na máquina (por exemplo, Docker e LocalDB), confirme em qual servidor o SSMS está conectado: a aplicação grava no que estiver na connection string.
+
+
 ## 4. Testes
 
 ```
